@@ -42,4 +42,4 @@ class Rating(models.Model):
     }
 
     def __str__(self):
-        return self.user.get_full_name() if self.user != None else 'Anonymous'
+        return self.user.get_full_name() if self.user is not None else 'Anonymous'
