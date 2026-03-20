@@ -1,6 +1,6 @@
 from unfold.admin import ModelAdmin
 
-from .book import BookInline
+from .book import BookAuthorInline
 
 class AuthorAdmin(ModelAdmin):
     list_display = ["pk", "lastname", "firstname"]
@@ -10,4 +10,4 @@ class AuthorAdmin(ModelAdmin):
         (None, {"fields": ["lastname", "firstname", "biography"]}),
     ]
 
-    inlines = [BookInline]
+    inlines = [BookAuthorInline]

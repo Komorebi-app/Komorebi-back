@@ -7,7 +7,7 @@ from .library import Library
 
 class Book(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    library = models.ForeignKey(Library, on_delete=models.CASCADE)
+    library = models.ManyToManyField(Library)
 
     isbn = models.CharField(
         verbose_name="ISBN",
@@ -44,3 +44,5 @@ class Book(models.Model):
 
     def __str__(self):
         return str(self.title)
+
+Book.library.through.__str__ = lambda x: f"{x.book.isbn}"
