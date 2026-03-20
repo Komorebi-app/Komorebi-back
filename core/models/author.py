@@ -10,8 +10,8 @@ class Author(models.Model):
         max_length=1500,
         validators=[MaxLengthValidator(1500)],
     )
-    firstname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
 
     formfield_overrides = {
         models.TextField: {
@@ -24,4 +24,4 @@ class Author(models.Model):
     }
 
     def __str__(self):
-        return f"{self.firstname} {self.lastname}"
+        return f"{self.first_name} {self.last_name}"

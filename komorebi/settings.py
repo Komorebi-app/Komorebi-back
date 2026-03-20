@@ -167,8 +167,8 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'HealthIA API',
-    'DESCRIPTION': 'API documentation for HealthIA',
+    'TITLE': 'Komorebi API',
+    'DESCRIPTION': 'API documentation for Komorebi',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SERVE_PERMISSIONS': [

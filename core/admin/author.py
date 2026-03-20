@@ -3,11 +3,11 @@ from unfold.admin import ModelAdmin
 from .book import BookAuthorInline
 
 class AuthorAdmin(ModelAdmin):
-    list_display = ["pk", "lastname", "firstname"]
-    search_fields = ["lastname", "firstname"]
+    list_display = ["pk", "last_name", "first_name"]
+    search_fields = ["last_name", "first_name"]
 
     fieldsets = [
-        (None, {"fields": ["lastname", "firstname", "biography"]}),
+        (None, {"fields": ["last_name", "first_name", "biography"]}),
     ]
 
     inlines = [BookAuthorInline]

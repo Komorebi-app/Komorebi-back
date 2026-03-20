@@ -22,7 +22,7 @@ class Book(models.Model):
     )
     language = models.CharField(max_length=2)
     pages = models.PositiveIntegerField()
-    published = models.DateTimeField(verbose_name="Date published")
+    published = models.DateField(verbose_name="Date published", null=True, blank=True)
     resume = models.TextField(
         blank=True,
         null=True,

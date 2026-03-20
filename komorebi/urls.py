@@ -9,7 +9,14 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from core.views import AuthorViewSet, BookViewSet, LibraryViewSet, RatingViewSet, UserViewSet
+
 router = routers.DefaultRouter()
+router.register(r'author', AuthorViewSet, basename='author')
+router.register(r'book', BookViewSet, basename='book')
+router.register(r'library', LibraryViewSet, basename='library')
+router.register(r'rating', RatingViewSet, basename='rating')
+router.register(r'user', UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
