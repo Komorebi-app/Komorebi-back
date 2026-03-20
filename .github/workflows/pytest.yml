@@ -1,0 +1,56 @@
+name: pytest
+
+on:
+  push:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: user_test
+          POSTGRES_PASSWORD: password_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Installation de Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        env:
+          SECRET_KEY: bh=nf@a9s7r06l1*x!#8u2yy+^&o1mv&onjid$kk^&ss*o7ije
+          DJANGO_DEBUG: False
+          ALLOWED_HOSTS: "*"
+          CSRF_TRUSTED_ORIGINS: "https://test.test"
+          CORS_ALLOWED_ORIGINS: "https://test.test"
+          CORS_ALLOWED_ORIGIN_REGEXES: "^.*$"
+          PAGINATION: 100
+          POSTGRES_DB: postgres
+          POSTGRES_USER: user_test
+          POSTGRES_PASSWORD: password_test
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+        run: pytest

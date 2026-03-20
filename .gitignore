@@ -1,0 +1,10 @@
+# DEV
+.venv/
+__pycache__/
+.idea/
+.DS_Store
+
+# APP
+logs/logs/
+.env
+staticfiles/
