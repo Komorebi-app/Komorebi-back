@@ -1,10 +1,11 @@
-from rest_framework import viewsets
-from core.models import Book
-from core.serializers import BookSerializer
-from core.utils.query import get_query_all_for_user
 from rest_framework import permissions, response, status
 from rest_framework.decorators import action
+from rest_framework import viewsets
+
+from core.models import Book
+from core.serializers import BookSerializer
 from core.services.google_books import fetch_google_book_by_isbn
+from core.utils.query import get_query_all_for_user
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -25,10 +26,10 @@ class BookViewSet(viewsets.ModelViewSet):
         isbn = request.query_params.get('isbn')
         if not isbn:
             return response.Response({"error": "ISBN requis"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Appel au service Google Books via ISBN
         data = fetch_google_book_by_isbn(isbn)
-        
+
         if data:
             return response.Response(data)
         return response.Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
