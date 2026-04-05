@@ -49,3 +49,4 @@ class BookViewSet(viewsets.ModelViewSet):
         if data:
             return Response(data)
         return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+    
