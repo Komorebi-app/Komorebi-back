@@ -1,10 +1,15 @@
-from rest_framework import permissions, response, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from core.models import Book
 from core.serializers import BookSerializer
-from core.services.google_books import fetch_google_book_by_isbn
+from core.services.google_books import (
+    GoogleBooksNotConfiguredError,
+    GoogleBooksRequestError,
+    fetch_google_book_by_isbn,
+)
 from core.utils.query import get_query_all_for_user
 
 
@@ -13,7 +18,7 @@ class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
 
     # Seuls les utilisateurs authentifiés peuvent accéder à cette vue
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     # Override get_queryset pour filtrer les livres par utilisateur
     def get_queryset(self):
@@ -25,11 +30,22 @@ class BookViewSet(viewsets.ModelViewSet):
     def search_by_isbn(self, request):
         isbn = request.query_params.get('isbn')
         if not isbn:
-            return response.Response({"error": "ISBN requis"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "ISBN requis"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Appel au service Google Books via ISBN
-        data = fetch_google_book_by_isbn(isbn)
+        try:
+            data = fetch_google_book_by_isbn(isbn)
+        except GoogleBooksNotConfiguredError:
+            return Response(
+                {"error": "Google Books non configuré: clé API manquante"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except GoogleBooksRequestError:
+            return Response(
+                {"error": "Erreur Google Books: service indisponible"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
         if data:
-            return response.Response(data)
-        return response.Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(data)
+        return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
