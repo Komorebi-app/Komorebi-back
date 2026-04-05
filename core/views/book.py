@@ -1,12 +1,51 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from core.models import Book
 from core.serializers import BookSerializer
+from core.services.google_books import (
+    GoogleBooksNotConfiguredError,
+    GoogleBooksRequestError,
+    fetch_google_book_by_isbn,
+)
 from core.utils.query import get_query_all_for_user
+
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
+    # Seuls les utilisateurs authentifiés peuvent accéder à cette vue
+    permission_classes = [IsAuthenticated]
+
+    # Override get_queryset pour filtrer les livres par utilisateur
     def get_queryset(self):
         return get_query_all_for_user(Book, self.request.user).order_by('id')
+
+
+    # Action pour rechercher un livre par ISBN
+    @action(detail=False, methods=['get'], url_path='search')
+    def search_by_isbn(self, request):
+        isbn = request.query_params.get('isbn')
+        if not isbn:
+            return Response({"error": "ISBN requis"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Appel au service Google Books via ISBN
+        try:
+            data = fetch_google_book_by_isbn(isbn)
+        except GoogleBooksNotConfiguredError:
+            return Response(
+                {"error": "Google Books non configuré: clé API manquante"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except GoogleBooksRequestError:
+            return Response(
+                {"error": "Erreur Google Books: service indisponible"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        if data:
+            return Response(data)
+        return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
