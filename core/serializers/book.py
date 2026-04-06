@@ -15,10 +15,16 @@ class AddBookToLibrarySerializer(serializers.Serializer):
 
     def validate_isbn(self, value):
         # Formattage de l'ISBN pour avoir le format de la BDD (sans tirets ni espaces)
-        isbn = value.replace('-', '').replace(' ', '')  
+        isbn = value.replace('-', '').replace(' ', '')
 
         # Vérification du format de l'ISBN (10 ou 13 chiffres)
         if not (len(isbn) == 10 or len(isbn) == 13) or not isbn.isdigit():
-            raise serializers.ValidationError("Le format de l'ISBN doit être de 10 ou 13 chiffres.")    
+            raise serializers.ValidationError("Le format de l'ISBN doit être de 10 ou 13 chiffres.")
 
         return isbn
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

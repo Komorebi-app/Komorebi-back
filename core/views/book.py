@@ -62,8 +62,8 @@ class BookViewSet(viewsets.ModelViewSet):
         serializer = AddBookToLibrarySerializer(data=request.data)
 
         # Ca permet à Django d'aller chercher les méthodes du serializer qui commencent par validate_
-        serializer.is_valid(raise_exception=True) # si isbn formatté pas bon, renvoie une 400
-        
+        serializer.is_valid(raise_exception=True)  # si isbn formatté pas bon, renvoie une 400
+
         # On récupère l'ISBN formatté par le serializer
         isbn = serializer.validated_data['isbn']
 
@@ -85,7 +85,7 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
         # Créer ou récupérer le livre en base via la méthode du service  book.py
-        book, created = get_or_create_book(data)
+        book, _ = get_or_create_book(data)
 
         # Ajouter le livre à la bibliothèque de l'utilisateur
         add_book_to_user_library(request.user, book)
