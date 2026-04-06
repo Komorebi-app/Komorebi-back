@@ -85,7 +85,7 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
         # Créer ou récupérer le livre en base via la méthode du service  book.py
-        book, _ = get_or_create_book(data)
+        book, _ = get_or_create_book(data, isbn)
 
         # Ajouter le livre à la bibliothèque de l'utilisateur
         add_book_to_user_library(request.user, book)
