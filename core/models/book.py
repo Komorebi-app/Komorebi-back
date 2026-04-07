@@ -1,4 +1,7 @@
+from django.contrib import admin
+
 from django.core.validators import MaxLengthValidator, RegexValidator
+from django.template.defaultfilters import truncatechars
 from django.db import models
 from django.forms import Textarea
 
@@ -44,5 +47,9 @@ class Book(models.Model):
 
     def __str__(self):
         return str(self.title)
-
+    
+    @admin.display(description= "resume")
+    def getResume(self):
+        return truncatechars(self.resume, 100)
+    
 Book.library.through.__str__ = lambda x: f"{x.book.isbn}"
