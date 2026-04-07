@@ -4,7 +4,7 @@ from core.admin.rating import RatingInline
 from core.models import Book
 
 class BookAdmin(ModelAdmin):
-    list_display = ["isbn", "title", "author", "language", "pages", "published"]
+    list_display = ["isbn", "title", "author", "language", "pages", "published", "resume"]
     list_filter = ["language"]
     search_fields = ["isbn", "title", "author"]
 
