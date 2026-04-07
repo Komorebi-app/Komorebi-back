@@ -1,10 +1,12 @@
+from pydantic import ValidationError
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.models import Book
-from core.serializers import BookSerializer, AddBookToLibrarySerializer
+from core.serializers import BookSerializer
+from core.schemas import BookIsbnSchema
 from core.services.google_books import (
     GoogleBooksNotConfiguredError,
     GoogleBooksRequestError,
@@ -58,16 +60,17 @@ class BookViewSet(viewsets.ModelViewSet):
         Ajoute un livre trouvé par ISBN à la bibliothèque de l'utilisateur.
         
         """
+        try: 
+            # On valide les données brutes avec Pydantic
+            validated_schema = BookIsbnSchema(**request.data)
 
-        serializer = AddBookToLibrarySerializer(data=request.data)
-
-        # Ca permet à Django d'aller chercher les méthodes du serializer qui commencent par validate_
-        serializer.is_valid(raise_exception=True)  # si isbn formatté pas bon, renvoie une 400
-
-        # On récupère l'ISBN formatté par le serializer
-        isbn = serializer.validated_data['isbn']
-
-        # Appel au service Google Books via ISBN
+            # On récupère l'ISBN formatté par le serializer
+            isbn = validated_schema.isbn
+        
+        except ValidationError as e:
+            # On renvoie les erreurs Pydantic au format DRF (400 Bad Request)
+            return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             data = fetch_google_book_by_isbn(isbn)
         except GoogleBooksNotConfiguredError:
@@ -90,5 +93,5 @@ class BookViewSet(viewsets.ModelViewSet):
         # Ajouter le livre à la bibliothèque de l'utilisateur
         add_book_to_user_library(request.user, book)
 
-        serializer = self.get_serializer(book)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        book = self.get_serializer(book)
+        return Response(book.data, status=status.HTTP_201_CREATED)
