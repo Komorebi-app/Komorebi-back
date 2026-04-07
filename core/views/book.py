@@ -58,19 +58,18 @@ class BookViewSet(viewsets.ModelViewSet):
     def add_to_library(self, request):
         """
         Ajoute un livre trouvé par ISBN à la bibliothèque de l'utilisateur.
-        
         """
-        try: 
+        try:
             # On valide les données brutes avec Pydantic
             validated_schema = BookIsbnSchema(**request.data)
 
             # On récupère l'ISBN formatté par le serializer
             isbn = validated_schema.isbn
-        
+
         except ValidationError as e:
             # On renvoie les erreurs Pydantic au format DRF (400 Bad Request)
             return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             data = fetch_google_book_by_isbn(isbn)
         except GoogleBooksNotConfiguredError:

@@ -1,12 +1,11 @@
-from datetime import datetime
-from pydantic import BaseModel, NonNegativeInt, validator
+from pydantic import BaseModel, validator
 
 
 class BookIsbnSchema(BaseModel):
     isbn: str
 
     @validator("isbn")
-    def validate_isbn(cls, value):
+    def validate_isbn(value):
         # Formattage de l'ISBN pour avoir le format de la BDD (sans tirets ni espaces)
         isbn = value.replace('-', '').replace(' ', '')
         # Vérification du format de l'ISBN (10 ou 13 chiffres)
