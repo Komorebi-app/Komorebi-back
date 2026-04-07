@@ -106,4 +106,3 @@ def fetch_google_book_by_title(title: str):
 
     # Livres trouvés
     return books
-
