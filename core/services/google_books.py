@@ -60,7 +60,7 @@ def fetch_google_book_by_title(title: str):
     api_key = getattr(settings, "GOOGLE_BOOKS_API_KEY", "")
     if not api_key:
         raise GoogleBooksNotConfiguredError("GOOGLE_BOOKS_API_KEY manquant")
-    
+
     # Appelle Google Books
     try:
         response = requests.get(
@@ -71,7 +71,7 @@ def fetch_google_book_by_title(title: str):
         response.raise_for_status()
     except requests.RequestException as exc:
         raise GoogleBooksRequestError("Erreur lors de l'appel Google Books") from exc
-    
+
     # Analyse la réponse
     try:
         data = response.json()
@@ -88,15 +88,15 @@ def fetch_google_book_by_title(title: str):
         for item in data["items"]:
             volume_info = item.get("volumeInfo")
             identifiers = volume_info.get('industryIdentifiers', [])
-            
+
             # On cherche l'ISBN_13 d'abord, sinon l'ISBN_10
             isbn_val = next((id['identifier'] for id in identifiers if id['type'] in ['ISBN_13', 'ISBN_10']), None)
-                
+
             # On n'ajoute le livre à la liste que s'il a un ISBN pour pouvoir dans le futur l'ajouter à la BDD via le front
             if isbn_val:
                 volume_info['isbn'] = isbn_val # On ajoute l'ISBN au volume_info pour faciliter son utilisation côté front ( pour un futur ajout de la part de l'utilisateur)
                 books.append(volume_info)
-                
+
             # si pas d'isbn, books.append n'est pas appelé et le livre n'est pas ajouté à la liste des résultats
 
         if not books:
