@@ -47,9 +47,9 @@ class Book(models.Model):
 
     def __str__(self):
         return str(self.title)
-    
+
     @admin.display(description= "resume")
     def getResume(self):
         return truncatechars(self.resume, 100)
-    
+
 Book.library.through.__str__ = lambda x: f"{x.book.isbn}"
