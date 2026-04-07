@@ -5,7 +5,9 @@ class BookIsbnSchema(BaseModel):
     isbn: str
 
     @validator("isbn")
-    def validate_isbn(value):
+    @classmethod
+    # Ajout de cls afin de représenter la classe elle même dans le décorateur @validator
+    def validate_isbn(cls, value):
         # Formattage de l'ISBN pour avoir le format de la BDD (sans tirets ni espaces)
         isbn = value.replace('-', '').replace(' ', '')
         # Vérification du format de l'ISBN (10 ou 13 chiffres)
