@@ -54,7 +54,7 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response(data)
         return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Recherche d'un livre par titre 
+    # Recherche d'un livre par titre
     @action(detail=False, methods=['get'], url_path='search-by-title')
     def search_by_title(self, request):
         title = request.query_params.get('title')
