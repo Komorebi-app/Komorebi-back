@@ -1,1 +1,1 @@
-from .book import BookIsbnSchema
+from .book import BookIsbnSchema, BookManualSchema
