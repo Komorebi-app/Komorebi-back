@@ -11,6 +11,7 @@ from core.services.google_books import (
     GoogleBooksNotConfiguredError,
     GoogleBooksRequestError,
     fetch_google_book_by_isbn,
+    fetch_google_book_by_title,
 )
 from core.services.book import add_book_to_user_library, get_or_create_book
 from core.utils.query import get_query_all_for_user
@@ -38,6 +39,31 @@ class BookViewSet(viewsets.ModelViewSet):
         # Appel au service Google Books via ISBN
         try:
             data = fetch_google_book_by_isbn(isbn)
+        except GoogleBooksNotConfiguredError:
+            return Response(
+                {"error": "Google Books non configuré: clé API manquante"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except GoogleBooksRequestError:
+            return Response(
+                {"error": "Erreur Google Books: service indisponible"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        if data:
+            return Response(data)
+        return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(detail=False, methods=['get'], url_path='search-by-title')
+    def search_by_title(self, request):
+        title = request.query_params.get('title')
+        if not title:
+            return Response({"error": "Titre requis"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Appel au service Google Books via le titre
+        try:
+            data = fetch_google_book_by_title(title)
         except GoogleBooksNotConfiguredError:
             return Response(
                 {"error": "Google Books non configuré: clé API manquante"},
