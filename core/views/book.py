@@ -6,14 +6,14 @@ from rest_framework.response import Response
 
 from core.models import Book
 from core.serializers import BookSerializer
-from core.schemas import BookIsbnSchema
+from core.schemas import BookIsbnSchema, BookManualSchema
 from core.services.google_books import (
     GoogleBooksNotConfiguredError,
     GoogleBooksRequestError,
     fetch_google_book_by_isbn,
     fetch_google_book_by_title,
 )
-from core.services.book import add_book_to_user_library, get_or_create_book
+from core.services.book import add_book_to_user_library, get_or_create_book, get_or_create_manual_book
 from core.utils.query import get_query_all_for_user
 
 
@@ -29,7 +29,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return get_query_all_for_user(Book, self.request.user).order_by('id')
 
 
-    # Action pour rechercher un livre par ISBN
+    # Recherche d'un livre par ISBN
     @action(detail=False, methods=['get'], url_path='search')
     def search_by_isbn(self, request):
         isbn = request.query_params.get('isbn')
@@ -54,7 +54,7 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response(data)
         return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
-
+    # Recherche d'un livre par titre 
     @action(detail=False, methods=['get'], url_path='search-by-title')
     def search_by_title(self, request):
         title = request.query_params.get('title')
@@ -80,6 +80,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response({"error": "Livre non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
 
+    # Ajout d'un livre via ISBN ( pour l'ajout après une recherche via google API )
     @action(detail=False, methods=['post'], url_path='add-to-library')
     def add_to_library(self, request):
         """
@@ -116,6 +117,25 @@ class BookViewSet(viewsets.ModelViewSet):
         book, _ = get_or_create_book(data, isbn)
 
         # Ajouter le livre à la bibliothèque de l'utilisateur
+        add_book_to_user_library(request.user, book)
+
+        book = self.get_serializer(book)
+        return Response(book.data, status=status.HTTP_201_CREATED)
+
+
+    # Ajout d'un livre via formulaire manuel (si livre pas trouvé dans google API)
+    @action(detail=False, methods=['post'], url_path='add-manual-to-library')
+    def add_manual_to_library(self, request):
+        """
+        Ajoute un livre manuellement via formulaire puis l'associe à la bibliothèque de l'utilisateur.
+        """
+        try:
+            validated_schema = BookManualSchema(**request.data)
+            payload = validated_schema.dict()
+        except ValidationError as e:
+            return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
+
+        book, _ = get_or_create_manual_book(payload)
         add_book_to_user_library(request.user, book)
 
         book = self.get_serializer(book)

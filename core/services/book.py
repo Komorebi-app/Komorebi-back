@@ -39,8 +39,12 @@ def get_or_create_book(data: dict, isbn: str):
     # Récupérer ou créer l'auteur via le service
     author = get_or_create_author(author_name)
 
+    # Récupérer l'URL de la couverture du livre
+    image_links = volume_info.get('imageLinks', {})
+    cover_url = image_links.get('thumbnail') or image_links.get('smallThumbnail')
+
     # Récupérer ou créer le livre dans la base de données
-    book, _ = Book.objects.get_or_create(
+    book, created = Book.objects.get_or_create(
         isbn=isbn,
         defaults={
             'title': volume_info.get('title', 'Sans titre'),
@@ -48,11 +52,34 @@ def get_or_create_book(data: dict, isbn: str):
             'pages': volume_info.get('pageCount', 0),
             'published': volume_info.get('publishedDate', None),
             'resume': volume_info.get('description', ''),
+            'cover_url': cover_url,
             'author': author,
         }
     )
 
-    return book, _
+    return book, created
+
+
+def get_or_create_manual_book(data: dict):
+    """
+    Crée ou récupère un livre à partir des données du formulaire manuel.
+    """
+    author = get_or_create_author(data['author'])
+
+    book, created = Book.objects.get_or_create(
+        isbn=data['isbn'],
+        defaults={
+            'title': data['title'],
+            'language': data.get('language', ''),
+            'pages': data.get('pages', 0),
+            'published': data.get('published'),
+            'resume': data.get('resume'),
+            'cover_url': data.get('cover_url'),
+            'author': author,
+        }
+    )
+
+    return book, created
 
 def add_book_to_user_library(user: User, book: Book):
     """

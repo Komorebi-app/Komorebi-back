@@ -33,6 +33,7 @@ class Book(models.Model):
         max_length=1500,
         validators=[MaxLengthValidator(1500)],
     )
+    cover_url = models.URLField(blank=True, null=True)
     title = models.CharField(max_length=100)
 
     formfield_overrides = {
@@ -51,5 +52,9 @@ class Book(models.Model):
     @admin.display(description= "resume")
     def getResume(self):
         return truncatechars(self.resume, 100)
+
+    @admin.display(description= "image")
+    def getCoverUrl(self):
+        return truncatechars(self.cover_url, 50)
 
 Book.library.through.__str__ = lambda x: f"{x.book.isbn}"
