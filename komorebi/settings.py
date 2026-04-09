@@ -253,6 +253,9 @@ TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 USE_TZ = False
 
+MEDIA_URL = '/api/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'core', 'media')
+
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 

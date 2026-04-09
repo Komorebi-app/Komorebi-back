@@ -1,3 +1,10 @@
+import uuid
+from pathlib import Path
+
+from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import default_storage
+from django.conf import settings
+
 from pydantic import ValidationError
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -130,10 +137,24 @@ class BookViewSet(viewsets.ModelViewSet):
         Ajoute un livre manuellement via formulaire puis l'associe à la bibliothèque de l'utilisateur.
         """
         try:
-            validated_schema = BookManualSchema(**request.data)
+            data = {
+                **request.POST.dict(),
+                **request.FILES.dict()
+            }
+            validated_schema = BookManualSchema(**data)
             payload = validated_schema.dict()
         except ValidationError as e:
             return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
+
+        image: UploadedFile = validated_schema.image
+        extension = Path(image.name).suffix
+        filename = f"{uuid.uuid4()}{extension}"
+
+        saved_filename = default_storage.save(filename, image)
+        relative_url = f"{settings.MEDIA_URL}{saved_filename}"
+
+        full_path = request.build_absolute_uri(relative_url)
+        payload['cover_url'] = full_path
 
         book, _ = get_or_create_manual_book(payload)
         add_book_to_user_library(request.user, book)

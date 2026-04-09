@@ -1,5 +1,8 @@
+from django.core.files.uploadedfile import UploadedFile
+
 from pydantic import BaseModel, validator
 
+from typing import Any
 
 class BookIsbnSchema(BaseModel):
     isbn: str
@@ -22,9 +25,17 @@ class BookManualSchema(BaseModel):
     author: str
     language: str = ''
     pages: int = 0
-    published: str | None = None # Peut être optionnel et si pas renseigné, on laisse à None
+    published: str | None = None
     resume: str | None = None
-    cover_url: str | None = None
+    image: Any
+
+    @validator('image')
+    def validate_image(cls, v):
+        if not isinstance(v, UploadedFile):
+            raise ValueError("Le fichier n'est pas une image valide")
+        if v.size > 2 * 1024 * 1024:
+            raise ValueError("L'image est trop lourde (max 2Mo)")
+        return v
 
     @validator("isbn")
     @classmethod
