@@ -4,6 +4,7 @@ from django.core.validators import MaxLengthValidator, RegexValidator
 from django.template.defaultfilters import truncatechars
 from django.db import models
 from django.forms import Textarea
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .author import Author
 from .library import Library
@@ -35,6 +36,14 @@ class Book(models.Model):
     )
     cover_url = models.URLField(blank=True, null=True)
     title = models.CharField(max_length=100)
+
+    progress = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(100),
+        ],
+        default=0
+    )
 
     formfield_overrides = {
         models.TextField: {
