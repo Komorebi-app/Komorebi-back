@@ -165,7 +165,7 @@ class BookViewSet(viewsets.ModelViewSet):
         payload['cover_url'] = full_path
 
         book, _ = get_or_create_manual_book(payload)
-        
+
         # Vérifier si le livre est déjà dans la bibliothèque de l'utilisateur
         library = request.user.library
         if book in library.book_set.all():
@@ -173,7 +173,7 @@ class BookViewSet(viewsets.ModelViewSet):
                 {"error": "Ce livre est déjà dans votre bibliothèque"},
                 status=status.HTTP_409_CONFLICT
             )
-        
+
         add_book_to_user_library(request.user, book)
 
         book = self.get_serializer(book)
