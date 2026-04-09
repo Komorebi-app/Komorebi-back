@@ -123,6 +123,14 @@ class BookViewSet(viewsets.ModelViewSet):
         # Créer ou récupérer le livre en base via la méthode du service  book.py
         book, _ = get_or_create_book(data, isbn)
 
+        # Vérifier si le livre est déjà dans la bibliothèque de l'utilisateur
+        library = request.user.library
+        if book in library.book_set.all():
+            return Response(
+                {"error": "Ce livre est déjà dans votre bibliothèque"},
+                status=status.HTTP_409_CONFLICT
+            )
+
         # Ajouter le livre à la bibliothèque de l'utilisateur
         add_book_to_user_library(request.user, book)
 
@@ -157,6 +165,15 @@ class BookViewSet(viewsets.ModelViewSet):
         payload['cover_url'] = full_path
 
         book, _ = get_or_create_manual_book(payload)
+
+        # Vérifier si le livre est déjà dans la bibliothèque de l'utilisateur
+        library = request.user.library
+        if book in library.book_set.all():
+            return Response(
+                {"error": "Ce livre est déjà dans votre bibliothèque"},
+                status=status.HTTP_409_CONFLICT
+            )
+
         add_book_to_user_library(request.user, book)
 
         book = self.get_serializer(book)
