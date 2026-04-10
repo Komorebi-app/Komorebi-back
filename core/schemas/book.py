@@ -1,8 +1,8 @@
+from typing import Any
+
 from django.core.files.uploadedfile import UploadedFile
 
 from pydantic import BaseModel, validator
-
-from typing import Any
 
 class BookIsbnSchema(BaseModel):
     isbn: str
@@ -30,6 +30,7 @@ class BookManualSchema(BaseModel):
     image: Any
 
     @validator('image')
+    @classmethod
     def validate_image(cls, v):
         if not isinstance(v, UploadedFile):
             raise ValueError("Le fichier n'est pas une image valide")
