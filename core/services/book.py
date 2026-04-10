@@ -43,21 +43,27 @@ def get_or_create_book(data: dict, isbn: str):
     image_links = volume_info.get('imageLinks', {})
     cover_url = image_links.get('thumbnail') or image_links.get('smallThumbnail')
 
-    # Récupérer ou créer le livre dans la base de données
-    book, created = Book.objects.get_or_create(
-        isbn=isbn,
-        defaults={
-            'title': volume_info.get('title', 'Sans titre'),
-            'language': volume_info.get('language', ''),
-            'pages': volume_info.get('pageCount', 0),
-            'published': volume_info.get('publishedDate', None),
-            'resume': volume_info.get('description', ''),
-            'cover_url': cover_url,
-            'author': author,
-        }
-    )
+    published_date_api = volume_info.get('publishedDate', None)
+    # Prendre juste la partie date si format ISO (ex: "2020-11-06T00:00:00+01:00" → "2020-11-06")
+    published_date_formatted = published_date_api.split('T')[0] if published_date_api else None
+    
 
-    return book, created
+
+    # Récupérer ou créer le livre dans la base de données
+    try:
+        book, created = Book.objects.get_or_create(
+            isbn=isbn,
+            defaults={
+                'title': volume_info.get('title', 'Sans titre'),
+                'language': volume_info.get('language', ''),
+                'pages': volume_info.get('pageCount', 0),
+                'published': published_date_formatted,
+                'resume': volume_info.get('description', ''),
+                'cover_url': cover_url,
+                'author': author,
+            }
+        )
+        return book, created
 
 
 def get_or_create_manual_book(data: dict):
