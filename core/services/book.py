@@ -64,7 +64,8 @@ def get_or_create_book(data: dict, isbn: str):
             }
         )
         return book, created
-
+    except Exception as e:
+        raise e
 
 def get_or_create_manual_book(data: dict):
     """
