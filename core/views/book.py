@@ -154,7 +154,8 @@ class BookViewSet(viewsets.ModelViewSet):
         relative_url = f"{settings.MEDIA_URL}{saved_filename}"
 
         full_path = request.build_absolute_uri(relative_url)
-        payload['cover_url'] = full_path
+
+        payload['cover_url'] = full_path[:4] + 's' + full_path[4:]
 
         book, _ = get_or_create_manual_book(payload)
         add_book_to_user_library(request.user, book)

@@ -9,9 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 class MediaViewSet(ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
-    def retrieve_file(self, request, filename):
+    def retrieve_file(self, _, filename):
         file_path = os.path.join(settings.MEDIA_ROOT, filename)
-        name, extension = os.path.splitext(filename)
+        _, extension = os.path.splitext(filename)
 
         if not os.path.exists(file_path):
             raise Http404("L'image n'existe pas sur le serveur.")
